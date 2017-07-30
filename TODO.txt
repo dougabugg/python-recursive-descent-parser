@@ -1,0 +1,8 @@
+
+also we should have a sensible __str__ for NodeContext
+
+we also have recursion issues. Extremely easy to raise a Recursion error,
+but really that's the user's fault for defining the grammar.
+
+rewrite the front end interacting with Nodes and Tokens.
+implement ending offset in front end for nodes.
