@@ -1,5 +1,7 @@
 # Python Recursive Descent Parser
-A quick and dirty Recursive Descent Parser written using Python 3. The frontend abuses python's [data model](https://docs.python.org/3/reference/datamodel.html) to make grammar definitions partially legible. Syntax error messages will probably never be as good as table-based parsers, and has room for improvement. However, they are useful in their current state.
+A quick and dirty Recursive Descent Parser written using Python 3. The frontend abuses python's [data model](https://docs.python.org/3/reference/datamodel.html) to make grammar definitions partially legible and easier to write. Error messages report line and column number of where parsing failed and why.
+
+Syntax error messages will probably never be as good as table-based parsers, and has room for improvement. However, they are useful in their current state.
 
 # Getting Started
 To begin defining your grammar, call the grammar function, and store the grammar context and grammar builder objects in separate variables.
@@ -19,7 +21,7 @@ c.phone = {r"\d{3}-\d{3}-\d{4}"}
 # match a combination of rules and strings
 c.contact_info = "contact_info(" + (c.email | c.phone) + ")"
 ```
-
+Define rules using built-in python types and operators, like sets, strings, add, and bitwise-or, and assign them as attributes on the context object.
 
 Finally, lets test our grammar.
 ```py
@@ -34,8 +36,7 @@ end, node = c.contact_info.parse(test_input2)
 assert(node.email[0].values == "john.doe@example.com")
 assert(node.phone is None)
 ```
-
-We pass in the rule we want to start parsing from, along with our message. The parse method returns a tuple with the offset where the parser stopped and the parse tree. Then we assert the string that was parsed as a number.
+Call the parse method on the rule object obtained from the context, and get a 2 tuple with the offset where parsing ended and the root node of the parse tree.
 
 # Frontend - Data Model
 The builder object is used to override the semantics of built-in types and operators, and use them to construct grammar rules. When constructing a rule, you must take care to use operators on builder objects and not on built-in types. For example, the following code is an error:
@@ -45,7 +46,10 @@ c.my_rule = "terminal" + [c.other_rule]
 
 Python will try to add the string and list and raise a TypeError. You must wrap one of the types in a builder object to enable overriding the addition operator, as follows:
 ```py
-c.my_rule = b("terminal") + [c.other_rule]
+# the builder object is callable, and wraps and returns its argument
+c.my_rule = b("terminal") + [c.optional]
+# the builder object is also the Empty rule, and can be prepended
+c.my_rule = b + "terminal" + [c.optional]
 ```
 
 Note that when assigning a rule to the grammar context, the value is automatically wrapped in a builder object for you.
@@ -80,23 +84,28 @@ The syntax for three built-in types, list, set, and string are also overridden
  * **List** with a single element means the element is optional (short cut for slicing).
  * **Set** with a single string is interpreted as a regular expression pattern.
  * **String** is interpreted as a terminal or literal, exact match.
+```py
+# avoid using built-in types improperly
+# both of the following examples raise a TypeError
+c.wont_work = ["a list with", "more than one element"]
+c.wont_work = {c.should_be_a_string}
+```
 
 It should be noted that sets and strings, when wrapped in a grammar builder object, are special matching rules called terminals. By default, terminals will ignore preceding whitespace before attempting to match. This behavior can be disabled by and-ing a builder object with a set or string.
 ```py
-# matches "bar" and " bar"
-c.foo = "bar"
-# matches only "bar"
-c.foo = b & "bar"
+# matches "foobar" and "foo bar"
+c.example = "foo" + "bar"
+# matches only "foobar"
+c.example = "foo" + b & "bar"
 ```
-
 The end of stream rule also ignores whitespace default, and can be disabled similarly (`b & b.EOS`).
 
 Also by default, string literals are not included in the parse tree. This behavior can be disabled, by multiplying a builder object with a string literal.
 ```py
 # excluded from parse tree
-c.exclude = "literal"
+c.excluded = "literal"
 # included in parse tree
-c.include = b * "literal"
+c.included = b * "literal"
 ```
 
 Finally, the builder object has two useful properties and methods
@@ -119,5 +128,7 @@ In total, there are 10 rule classes
  * **`EndOfStream`** matches the end of the stream (skipping whitespace).
 
 `Terminal`, `Regex`, and `EndOfStream` have an `ignore_whitespace` flag (default true) if they should skip spaces and line breaks before trying to match. `Terminal` and `Regex` have an `ignore_token` flag which prevents a `Token` node from being generated. There is also a helper method called `Option` which is equivalent to `Repeat(rule, 0, 1)`.
+
+The method `use_explicit_new_lines` is used to change the behavior of the `ignore_whitespace` flag, and operates on a global flag variable. Calling it with no parameters (or `None`) returns the current value, and passing `True` or `False` modifies it. By default, the flag is set to `False`, and when ignoring whitespace, the new line character will also be ignored. With `True`, you must specify new lines explicitly in your rules, they will not be ignored like other whitespace.
 
 The nodes returned by `match` are the raw, unmasked `BaseNode` objects. A node is either a `Node` or a `Token`. A `Node` has an `offset`, a `name`, and a list of child `nodes`. A `Token` has an `offset` and a `value` which is the matched text from the source. `Token` is only generated by the `Terminal` and `Regex` rules, and `Node` is only generated by `Rule`.
