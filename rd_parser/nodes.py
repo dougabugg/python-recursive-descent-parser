@@ -9,7 +9,7 @@ class Node(BaseNode):
         self.nodes = []
 
     def __as_dict__(self):
-        return {"name": o.name, "nodes": [node.__as_dict__() for node in o.nodes]}
+        return {"name": self.name, "nodes": [node.__as_dict__() for node in self.nodes]}
 
 class Token(BaseNode):
     def __init__(self, offset, value):
@@ -17,7 +17,7 @@ class Token(BaseNode):
         self.value = value
 
     def __as_dict__(self):
-        return {"offset": o.offset, "value": o.value}
+        return {"offset": self.offset, "value": self.value}
 
 
 class NodeInspector:

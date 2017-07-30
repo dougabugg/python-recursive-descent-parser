@@ -47,22 +47,33 @@ class RuleBuilder:
         self.rule = self.unwrap(rule)
         self.comment_rule = self.unwrap(comment_rule)
 
-    EOF = EOS = EndOfStream()
+    @property
+    def EOS(self):
+        return self._wrap(EndOfStream())
+    EOF = EOS
+
+    @property
+    def EOL(self):
+        return self._wrap(self.unwrap({r"\s*"})).silent()
 
     def silent(self):
         return self._wrap(Silent(self.rule))
 
-    def parse(self, source, offset=0):
+    def parse(self, source, offset=0, explicit_new_lines=None):
         rule = self.rule
+        old = use_explicit_new_lines()
+        use_explicit_new_lines(explicit_new_lines)
         try:
             offset, nodes, error = rule.match(source, offset)
             return offset, NodeInspector(nodes[0]).mask
         except RuleError as e:
             raise ParseError(e, source) from e
+        finally:
+            use_explicit_new_lines(old)
 
-    def parse_or_print(self, source, offset=0):
+    def parse_or_print(self, source, offset=0, explicit_new_lines=None):
         try:
-            return self.parse(source, offset)
+            return self.parse(source, offset, explicit_new_lines)
         except ParseError as e:
             e.print()
             return None, None
@@ -172,6 +183,7 @@ class ParseError(Exception):
         self._print_source_error()
         error = self.rule_error
         error_name = error.__class__.__name__
+        message = error.reason
         if isinstance(error, TerminalError):
             term = error.offending_rule.terminal
             message = "expected `{}`".format(term)
