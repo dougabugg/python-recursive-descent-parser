@@ -68,6 +68,8 @@ c.quoted_string = '"' + (ANY_CHAR - '"')[:] + '"'
 # bitwise or operator example
 c.sex = c.male | c.female
 
+# exactly N times
+c.my_rule[n]
 # zero or more
 c.my_rule[:]
 # optional (zero or one)
@@ -109,6 +111,8 @@ c.included = b * "literal"
 Finally, the builder object has two useful properties and methods
  * **`b.EOS`** or **`b.EOF`** matches the end of the stream.
  * **`rule.silent()`** returns a copy of `rule` that is excluded from the parse tree
+
+TODO: document `parse` method here
 
 # Backend - API
 The rules can be imported from the `rd_parser.rules` module. Every rule is a subclass of Rule and has a method named `match` that takes two arguments, a source string or stream and an offset within the source, and returns a 3 item tuple with the new offset, a list of nodes, and an error. If a rule fails to match, an exception will be raised subclassed from RuleError, with 3 attributes: `offset`, `reason`, `offending_rule`. The error in the tuple returned from the `match` method is used by the `Choice` rule to make error reporting more accurate.
