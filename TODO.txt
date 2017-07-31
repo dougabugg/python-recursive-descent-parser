@@ -1,8 +1,11 @@
+we should revise the backend and frontend to support named slots in a rule. this will require extra syntax in the frontend, and (maybe) support in the backend. Right now, a node just has a list of child nodes, which contain both Tokens and Nodes, and without "naming" the child nodes, it may be confusing.
+We could implement this without changing the backend (which might be what we want to do). For example:
+c.rule3 = c.rule1["left"] + "operator" + c.rule2["right"]
+now the node returned by parsing c.rule3 should have a left and right parameter, and selecting left or right on the node mask object would return mask(left.nodes[0]). We could have the __getitem__ support a single string argument (only when the builder's inner rule is an instance of Rule). the node mask would have to detect if a named rule has a single child and... this seems error prone though; I'm not a big fan of the current NodeInspector api anyways, but I can't really see a way around it. I guess we could create another Rule like RuleProperty which would have a name, which NodeMask could detect and handle... hmm
+because we don't want the API to be rule3_node.left.rule1 ... we could force NodeMask to not use lists for properties, and if a property gets clobbered, just name it in your grammar (like the above left-right example)
 
-also we should have a sensible __str__ for NodeContext
+I think this is the route we should take as a next step.
 
-we also have recursion issues. Extremely easy to raise a Recursion error,
-but really that's the user's fault for defining the grammar.
-
-rewrite the front end interacting with Nodes and Tokens.
-implement ending offset in front end for nodes.
+So, changes to make:
+ - modify __getitem__ on RuleBuilder to support a str when isinstance(self.rule, Rule)
+ - modify NodeMask to return mask(node.nodes[0]) instead of mask(node) when getting a property (only when node and node.nodes[0] are both Node)
