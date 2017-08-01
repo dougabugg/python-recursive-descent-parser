@@ -113,7 +113,7 @@ Finally, the builder object has two useful properties and methods
  * **`b.EOL`** matches all whitespace, including new lines, and is silent (doesn't generate token nodes). used when new lines are explicit.
  * **`rule.silent()`** returns a copy of `rule` that is excluded from the parse tree
 
-All builder objects have a `parse` method, that takes a `source`, an `offset`, and an `explicit_new_lines` flag as arguments, which uses the rule and parses the source input, outputting a tuple with the ending offset and a special `NodeMask` object. The `NodeMask` wraps a raw `BaseNode` (detailed in the backend section).
+All builder objects have a `parse` method, that takes a `source`, an `offset`, and an `explicit_new_lines` flag as arguments, which uses the rule and parses the source input, outputting a tuple with the ending offset and a special `NodeMask` object. The `NodeMask` wraps a raw `BaseNode` (detailed in the backend section). Details on the `explicit_new_lines` flag are detailed below in the backend section.
 
 A regex or string literal rule (`b * "literal"`) will return a token node. Token nodes have an `offset` and `value` property. A named rule will return a named node, with `_offset`, `_end_offset`, and `_name` attributes. In addition, a named node will have a child named node for each child named rule that was present in the original rule, which can be accessed as an attribute on the named node. If no child named node is present, an attribute access will simply return `None`. For each regex or string literal rule in a named rule, a token node will be present. They can be accessed either by subscripting/indexing or iterating.
 
@@ -133,7 +133,7 @@ What happens if you use the same named rule in a rule twice? What happens if a n
 ```py
 c.identifier = {r"[a-zA-Z0-9_]+"}
 # two identifier rules would overwrite each other unless we override their names
-c.field = c.identifier["name"] + ":" c.identifier["type"] + ";"
+c.field = c.identifier["name"] + ":" + c.identifier["type"] + ";"
 # zero or more field rules must be renamed and end with "[]" to turn them into a list
 c.struct = "struct" + c.identifier + "{" + c.field[:]["fields[]"] + "}"
 
