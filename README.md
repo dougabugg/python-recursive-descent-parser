@@ -37,6 +37,8 @@ assert(node.phone is None)
 Call the parse method on the rule object obtained from the context, and get a 2 tuple with the ending offset and the root node of the parse tree.
 
 # Frontend - Data Model
+The `grammar` function returns the grammar context and grammar builder objects. The context object lets you create named rules by assigning rule expressions to attributes, and create forward declarations simply by referencing an attribute and defining/assigning to it later. The `grammar` takes an optional `comment_rule` parameter, which allows you to supply a rule to be interleaved between all joined rules. The comment rule is automatically made zero or more and silenced (no node output), but this behavior can be override by using the `raw_comment_rule` parameter.
+
 The builder object is used to override the semantics of built-in types and operators, and use them to construct grammar rules. When constructing a rule, you must take care to use operators on builder objects and not on built-in types. For example, the following code is an error:
 ```py
 c.my_rule = "terminal" + [c.other_rule]
