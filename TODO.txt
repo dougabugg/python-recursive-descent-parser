@@ -9,3 +9,4 @@ I think this is the route we should take as a next step.
 So, changes to make:
  - modify __getitem__ on RuleBuilder to support a str when isinstance(self.rule, Rule)
  - modify NodeMask to return mask(node.nodes[0]) instead of mask(node) when getting a property (only when node and node.nodes[0] are both Node)
+ - add a _name field to NodeMask
