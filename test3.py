@@ -1,4 +1,4 @@
-from rd_parser import Grammar
+from rdparser import Grammar
 
 grammar = Grammar()
 c = grammar.context

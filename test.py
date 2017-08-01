@@ -1,4 +1,4 @@
-from rd_parser.builder import grammar
+from rdparser.builder import grammar
 
 b = grammar.builder
 comments = (b("//") + {r"[^\n]*"}) | \

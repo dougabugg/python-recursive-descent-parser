@@ -1,4 +1,4 @@
-from rd_parser.builder import grammar
+from rdparser.builder import grammar
 import json
 
 comment = grammar.builder("//") + {r"[^\n]*\n?"}
@@ -10,7 +10,7 @@ c.something = identifier + [":" + identifier] + ";"
 c.test = "{" + c.something[:] + "}"
 
 
-# from rd_parser.rules import print_rule_tree
+# from rdparser.rules import print_rule_tree
 # print_rule_tree(c.test.rule)
 
 def test(s):
