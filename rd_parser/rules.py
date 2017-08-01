@@ -209,3 +209,31 @@ def _skip_whitespace(source, offset):
         return offset
     else:
         return offset + len(result[0])
+
+
+SINGLE_RULES = (Rule, Repeat, Silent)
+MULTI_RULES = (Join, Choice)
+TERMINALS = (Terminal, Regex, Empty, EndOfStream)
+
+def iter_rule(rule):
+    if isinstance(rule, SINGLE_RULES):
+        yield rule.rule
+    elif isinstance(rule, MULTI_RULES):
+        yield from rule.rules
+    elif isinstance(rule, TERMINALS):
+        yield from ()
+    elif isinstance(rule, Predicate):
+        yield from (rule.rule, rule.predicate)
+    else:
+        raise TypeError
+
+def print_rule_tree(rule, indent="| ", indent_count=0):
+    padding = indent * indent_count
+    details = ""
+    if isinstance(rule, Terminal):
+        details = '"' + rule.terminal + '"'
+    elif isinstance(rule, Rule):
+        details = 'name=' + rule.name
+    print(padding + "[{}] {}".format(rule.__class__.__name__, details))
+    for _rule in iter_rule(rule):
+        print_rule_tree(_rule, indent, indent_count + 1)

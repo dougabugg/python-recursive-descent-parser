@@ -39,12 +39,12 @@ class NodeInspector:
         if target.opts.get("flatten"):
             if target.opts.get("as_list"):
                 if len(self.names) >= 1:
-                    nodes = list(self.names.values)[0]
+                    nodes = list(self.names.values())[0]
                 else:
                     nodes = []
                 self.mask = [NodeInspector(node).mask for node in nodes]
             elif len(self.names) >= 1:
-                nodes = list(self.names.values)[0]
+                nodes = list(self.names.values())[0]
                 self.mask = NodeInspector(nodes[0]).mask
             else:
                 self.mask = None

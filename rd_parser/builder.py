@@ -27,15 +27,15 @@ class GrammarContext:
         super().__setattr__("_grammar", grammar)
     
     def __getattr__(self, name, raw=False):
-        grammar = self._grammar
-        rules = grammar.rules
+        g = self._grammar
+        rules = g.rules
         if name not in rules:
             rule = Rule(name)
             rules[name] = rule
-        if raw or grammar.comment_rule is None:
-            return grammar.builder(rules[name])
+        if raw or g.comment_rule is None:
+            return g.builder(rules[name])
         else:
-            return grammar.comment_rule + grammar.builder(rules[name]) + grammar.comment_rule
+            return g.builder(Join((g.comment_rule.rule, rules[name], g.comment_rule.rule)))
 
     def __setattr__(self, name, value):
         rule = self.__getattr__(name, True).rule
