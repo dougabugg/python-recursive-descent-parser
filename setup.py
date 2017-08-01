@@ -21,6 +21,6 @@ setup(
         'Intended Audience :: Developers',
         'Programming Language :: Python :: 3',
     ],
-    keywords="recursive descent parsing frontend",
+    keywords="recursive descent parsing parse parser frontend",
     python_requires='>=3',
 )
