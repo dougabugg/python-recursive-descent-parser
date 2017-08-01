@@ -61,7 +61,7 @@ class RuleBuilder:
 
     def parse(self, source, offset=0, explicit_new_lines=None):
         rule = self.rule
-        old = use_explicit_new_lines()
+        old_flag_value = use_explicit_new_lines()
         use_explicit_new_lines(explicit_new_lines)
         try:
             offset, nodes, error = rule.match(source, offset)
@@ -69,14 +69,14 @@ class RuleBuilder:
         except RuleError as e:
             raise ParseError(e, source) from e
         finally:
-            use_explicit_new_lines(old)
+            use_explicit_new_lines(old_flag_value)
 
     def parse_or_print(self, source, offset=0, explicit_new_lines=None):
         try:
             return self.parse(source, offset, explicit_new_lines)
         except ParseError as e:
             e.print()
-            return None, None
+            return e.rule_error.offset, None
 
     @staticmethod
     def unwrap(target):
@@ -96,7 +96,7 @@ class RuleBuilder:
             expression = target.pop()
             if isinstance(expression, str):
                 return Regex(re.compile(expression))
-        raise TypeError
+        raise TypeError("failed to unwrap unsupported data type " + target.__class__)
 
     def _wrap(self, rule):
         return RuleBuilder(rule, self.comment_rule)
@@ -135,7 +135,7 @@ class RuleBuilder:
             return self._wrap(Repeat(self.rule, other, other))
         elif isinstance(other, tuple) and len(other) == 2:
             return self._wrap(Repeat(self.rule, other[0], other[1]))
-        raise TypeError
+        raise TypeError("operation only valid with str, slice, int or tuple, not " + other.__class__)
 
     __iter__ = None
 
@@ -146,14 +146,14 @@ class RuleBuilder:
     def __mul__(self, other):
         if isinstance(other, str):
             return self._wrap(Terminal(other))
-        raise TypeError
+        raise TypeError("operation only valid on Terminal, not " + other.__class__)
 
     def __and__(self, other):
         if isinstance(other, (EndOfStream, str, set)):
             other = self.unwrap(other)
             other.rule.ignore_whitespace = False
             return other
-        raise TypeError
+        raise TypeError("operation only valid on EndOfStream, Regex, or Terminal, not " + other.__class__)
 
     def __call__(self, rule):
         # return RuleBuilder(self.unwrap(rule), self.comment_rule)

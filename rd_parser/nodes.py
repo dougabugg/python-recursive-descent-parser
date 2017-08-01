@@ -24,7 +24,7 @@ class Token(BaseNode):
 class NodeInspector:
     def __init__(self, target):
         if not isinstance(target, Node):
-            raise TypeError
+            raise TypeError("target should be an instance of Node, not " + target.__class__)
         self.target = target
         self.names = {}
         self.values = []

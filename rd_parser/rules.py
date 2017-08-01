@@ -16,7 +16,7 @@ class Rule(BaseRule):
 
     def match(self, source, offset):
         if self.rule is None:
-            raise RuntimeError("rule `{}` is None or assign_rule never called".format(self.name))
+            raise RuntimeError("rule `{}` was forward declared, but never given a value with assign_rule()".format(self.name))
         node = Node(offset, self.name, **self.opts)
         offset, node.nodes, error = self.rule.match(source, offset)
         node.end_offset = offset
@@ -225,7 +225,7 @@ def iter_rule(rule):
     elif isinstance(rule, Predicate):
         yield from (rule.rule, rule.predicate)
     else:
-        raise TypeError
+        raise TypeError("rule should be an instance of BaseRule, not " + rule.__class__)
 
 def print_rule_tree(rule, indent="| ", indent_count=0):
     padding = indent * indent_count
