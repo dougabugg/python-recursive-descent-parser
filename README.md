@@ -117,9 +117,9 @@ Finally, the builder object has a few useful properties and methods
  * **`rule.parse(source, ...)`** parses the source input, raising a `ParseError` when parsing fails.
  * **`rule.parse_or_print(source, ...)`** same as `rule.parse` except it catches any parsing errors and pretty prints them.
 
-All builder objects have a `parse` method, that takes a `source`, an `offset`, and an `explicit_new_lines` flag as arguments, which uses the rule and parses the source input, outputting a tuple with the ending offset and a special `NodeMask` object. The `NodeMask` wraps a raw `BaseNode` (detailed in the backend section). Details on the `explicit_new_lines` flag are detailed below in the backend section.
+All builder objects have a `parse` method, that takes a `source`, an `offset`, and an `explicit_new_lines` flag as arguments, which uses the rule and parses the source input, outputting a tuple with the ending offset and a special `NodeMask` object. The `NodeMask` wraps a raw `BaseNode`. Details on the `explicit_new_lines` flag and the `BaseNode` class are detailed below in the backend section.
 
-A regex or string literal (with `b * "literal"`) rule will return a token node. Token nodes have an `offset` and `value` property. A named rule will return a named node, with `_offset`, `_end_offset`, and `_name` attributes. In addition, a named node will have a child named node for each child named rule that was present in the original rule, which can be accessed as an attribute on the named node. If no child named node is present, an attribute access will simply return `None`. For each regex or string literal rule in a named rule, a token node will be present. They can be accessed either by subscripting/indexing or iterating.
+A regex or string literal (with `b * "literal"`) rule will return a token node. Token nodes have an `offset` and `value` property. A named rule will return a named node, with `_offset`, `_end_offset`, and `_name` attributes. All the child rules of a parent rule will generate named nodes as children of the parent node when returned from `parse`. These child named nodes can be accessed by their name as attributes on the parent named node. If an attribute access is made but matches no child named node, `None` will be returned. For each regex or string literal rule in a named rule, a token node will be present. They can be accessed either by subscripting/indexing or iterating.
 
 ```py
 # still a named rule, 
@@ -136,7 +136,7 @@ offset, node = c.my_rule.parse("")
 assert(node.my_regex is None)
 ```
 
-What happens if you use the same named rule in a rule twice? What happens if a named rule repeats zero or more times? By design, any duplicate names will overwrite each other on the named node's attributes. To get around this, you can use the subscript (`__getitem__`) operator on a builder object to override the name of the target rule. Instead of accessing the node's attribute named after the original rule, you access the attribute using the upplied name. If you end the name with "[]", the attribute access will result in a list of nodes.
+What happens if you use the same named rule in a rule twice, or a named rule repeats zero or more times? By design, any duplicate names will overwrite each other on the named node's attributes. To get around this, you can override the name of a rule when defining your grammar by passing a string into the subscript (`__getitem__`) operator on a builder object. The child node will be accessed by this name instead of its original name. If you end the name with "[]", the attribute access will result in a list of nodes.
 
 ```py
 c.identifier = {r"[a-zA-Z0-9_]+"}
