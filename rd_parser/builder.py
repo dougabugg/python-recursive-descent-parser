@@ -124,7 +124,12 @@ class RuleBuilder:
         return self._wrap(Choice((self.rule, other)))
     
     def __getitem__(self, other):
-        if isinstance(other, slice):
+        if isinstance(other, str):
+            if other.endswith("[]"):
+                return self._wrap(Rule(other[:-2], self.rule, flatten=True, as_list=True))
+            else:
+                return self._wrap(Rule(other, self.rule, flatten=True))
+        elif isinstance(other, slice):
             return self._wrap(Repeat(self.rule, other.start, other.stop))
         elif isinstance(other, int):
             return self._wrap(Repeat(self.rule, other, other))

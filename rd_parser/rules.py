@@ -9,14 +9,15 @@ class BaseRule:
     pass
 
 class Rule(BaseRule):
-    def __init__(self, name="", rule=None):
+    def __init__(self, name="", rule=None, **opts):
         self.name = name
         self.rule = rule
+        self.opts = opts
 
     def match(self, source, offset):
         if self.rule is None:
             raise RuntimeError("rule `{}` is None or assign_rule never called".format(self.name))
-        node = Node(offset, self.name)
+        node = Node(offset, self.name, **self.opts)
         offset, node.nodes, error = self.rule.match(source, offset)
         node.end_offset = offset
         return offset, [node], error
@@ -187,12 +188,13 @@ class EndOfStreamError(RuleError):
 def Option(rule):
     return Repeat(rule, 0, 1)
 
+explicit_new_lines = False
+
 def use_explicit_new_lines(b=None):
+    global explicit_new_lines
     if b is None:
         return explicit_new_lines
     explicit_new_lines = b
-
-explicit_new_lines = False
 
 _match_all_whitespace = re.compile(r"\s*")
 _match_whitespace_no_new_lines = re.compile(r"[^\S\n]*")
