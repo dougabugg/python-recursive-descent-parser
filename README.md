@@ -96,7 +96,7 @@ c.wont_work = {c.should_be_a_string}
 It should be noted that sets and strings, when wrapped in a grammar builder object, are special matching rules called terminals. By default, terminals will ignore preceding whitespace before attempting to match. This behavior can be disabled by and-ing a builder object with a set or string.
 ```py
 # matches "foobar" and "foo bar"
-c.example = "foo" + "bar"
+c.example = b("foo") + "bar"
 # matches only "foobar"
 c.example = "foo" + b & "bar"
 ```
