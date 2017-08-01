@@ -134,11 +134,11 @@ Also by default, string literals are not included in the parse tree. This behavi
 
 Finally, the builder object has a few useful properties and methods
 
-* **``b.EOS``** or **``b.EOF``** matches the end of the stream. 
-* **``b.EOL``** matches all whitespace, including new lines, and is silent (doesn't generate token nodes). used when new lines are explicit.
-* **``rule.silent()``** returns a copy of ``rule`` that is excluded from the parse tree.
-* **``rule.parse(source, ...)``** parses the source input, raising a ``ParseError`` when parsing fails.
-* **``rule.parse_or_print(source, ...)``** same as ``rule.parse`` except it catches any parsing errors and pretty prints them.
+* ``b.EOS`` or ``b.EOF`` matches the end of the stream. 
+* ``b.EOL`` matches all whitespace, including new lines, and is silent (doesn't generate token nodes). used when new lines are explicit.
+* ``rule.silent()`` returns a copy of ``rule`` that is excluded from the parse tree.
+* ``rule.parse(source, ...)`` parses the source input, raising a ``ParseError`` when parsing fails.
+* ``rule.parse_or_print(source, ...)`` same as ``rule.parse`` except it catches any parsing errors and pretty prints them.
 
 All builder objects have a ``parse`` method, that takes a ``source``, an ``offset``, and an ``explicit_new_lines`` flag as arguments, which uses the rule and parses the source input, outputting a tuple with the ending offset and a special ``NodeMask`` object. The ``NodeMask`` wraps a raw ``BaseNode``. Details on the ``explicit_new_lines`` flag and the ``BaseNode`` class are detailed below in the backend section.
 
@@ -189,16 +189,16 @@ The rules can be imported from the ``rdparser.rules`` module. Every rule is a su
 
 In total, there are 10 rule classes
 
-* **``Rule``** a named rule supporting forward declaration.
-* **``Join``** matches a consecutive sequence of child rules.
-* **``Choice``** matches only one rule from a sequence.
-* **``Repeat``** matches a rule some amount of times.
-* **``Predicate``** only matches a rule if a predicate rule fails first.
-* **``Terminal``** matches a string literal.
-* **``Regex``** matches a regular expression pattern.
-* **``Empty``** matches nothing, doesn't generate nodes or advance the offset.
-* **``Silent``** "silences" or removes nodes returned by child rule.
-* **``EndOfStream``** matches the end of the stream (skipping whitespace).
+* ``Rule`` a named rule supporting forward declaration.
+* ``Join`` matches a consecutive sequence of child rules.
+* ``Choice`` matches only one rule from a sequence.
+* ``Repeat`` matches a rule some amount of times.
+* ``Predicate`` only matches a rule if a predicate rule fails first.
+* ``Terminal`` matches a string literal.
+* ``Regex`` matches a regular expression pattern.
+* ``Empty`` matches nothing, doesn't generate nodes or advance the offset.
+* ``Silent`` "silences" or removes nodes returned by child rule.
+* ``EndOfStream`` matches the end of the stream (skipping whitespace).
 
 ``Terminal``, ``Regex``, and ``EndOfStream`` have an ``ignore_whitespace`` flag (default true) if they should skip spaces and line breaks before trying to match. ``Terminal`` and ``Regex`` have an ``ignore_token`` flag which prevents a ``Token`` node from being generated. There is also a helper method called ``Option`` which is equivalent to ``Repeat(rule, 0, 1)``.
 
