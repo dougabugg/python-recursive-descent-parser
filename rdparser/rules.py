@@ -55,11 +55,13 @@ class Choice(BaseRule):
     def match(self, source, offset, nodes):
         furthest = None
         furthest_nodes = None
+        success = False
         for rule in self.rules:
             try:
                 new_nodes = []
                 offset, error = rule.match(source, offset, new_nodes)
                 furthest_nodes = new_nodes
+                success = True
                 if error is not None and (furthest is None or error.offset >= furthest.offset):
                     furthest = error
                 break
@@ -67,7 +69,7 @@ class Choice(BaseRule):
                 if furthest is None or e.offset >= furthest.offset:
                     furthest_nodes = new_nodes
                     furthest = e
-        if furthest_nodes is None:
+        if not success:
             raise furthest
         nodes.extend(furthest_nodes)
         return offset, furthest
@@ -87,18 +89,17 @@ class Repeat(BaseRule):
                 _offset = offset
                 new_nodes = []
                 offset, last_error = self.rule.match(source, offset, new_nodes)
+                nodes.extend(new_nodes)
                 if _offset == offset:
-                    print(new_nodes, offset, last_error, self.rule.rule)
                     raise RuntimeError("infinite loop detected inside Repeat rule")
                 count += 1
             except RuleError as e:
                 if self._min is not None and count < self._min:
+                    nodes.extend(new_nodes)
                     raise
                 else:
                     last_error = e
                     break
-            finally:
-                nodes.extend(new_nodes)
         return offset, last_error
 
 class Predicate(BaseRule):
@@ -239,7 +240,7 @@ def iter_rule(rule):
     else:
         raise TypeError("rule should be an instance of BaseRule, not " + rule.__class__)
 
-def print_rule_tree(rule, indent="| ", indent_count=0, full=False):
+def print_rule_tree(rule, indent="| ", indent_count=0, truncate=40):
     padding = indent * indent_count
     details = ""
     if isinstance(rule, Terminal):
@@ -247,8 +248,8 @@ def print_rule_tree(rule, indent="| ", indent_count=0, full=False):
     elif isinstance(rule, Rule):
         details = 'name=' + rule.name
     print(padding + "[{}] {}".format(rule.__class__.__name__, details))
-    if len(padding) > 40 and not full:
-        print(padding + "<full output truncated>")
+    if truncate is not None and len(padding) > truncate:
+        print(padding + indent + "<full output truncated (truncate={})>".format(truncate))
         return
     for _rule in iter_rule(rule):
-        print_rule_tree(_rule, indent, indent_count + 1, full)
+        print_rule_tree(_rule, indent, indent_count + 1, truncate)

@@ -1,8 +1,10 @@
 from rdparser.builder import grammar
 
 b = grammar.builder
-comments = (b("//") + {r"[^\n]*"}) | \
-    ("/*" + ({r"[^*]*"} + b(b + "*" - "*/"))[:] + "*/")
+single_line_comment = b("//") + {r"[^\n]*"}
+multi_line_comment = ("/*" + ({r"[^*]*"} + (b("*") - "*/"))[:] + "*/")
+comments = single_line_comment | multi_line_comment
+
 c, b = grammar(comments)
 
 def delimited_list(item, separator=","):
@@ -30,6 +32,8 @@ c.type_definition = c.struct_definition | c.enum_definition
 c.module_body = c.type_definition[:] + b.EOF
 
 
+# from rdparser.rules import print_rule_tree
+# print_rule_tree(c.module_body.rule)
 
 s = """
 // comment
