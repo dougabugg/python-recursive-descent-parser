@@ -1,7 +1,7 @@
 Python Recursive Descent Parser
 ===============================
 
-A quick and dirty Recursive Descent Parser written using Python 3. The frontend abuses python's `data model <https://docs.python.org/3/reference/datamodel.html>`_ to make grammar definitions partially legible and easier to write. After a grammar is defined, it can be used to convert text into a parse tree.
+A quick and dirty Recursive Descent Parser written using Python 3. The frontend abuses python's `data model <https://docs.python.org/3/reference/datamodel.html#special-method-names>`_ to make grammar definitions partially legible and easier to write. After a grammar is defined, it can be used to convert text into a parse tree.
 
 Getting Started
 ===============
