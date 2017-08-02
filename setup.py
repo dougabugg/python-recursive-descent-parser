@@ -14,7 +14,7 @@ setup(
     long_description=long_description,
     url="https://github.com/dougabugg/python-recursive-descent-parser",
     author="Douglas Rezabek",
-    author_email="dougabugg (at) gmail.com"
+    author_email="dougabugg (at) gmail.com",
     license="MIT",
     classifiers=[
         'Development Status :: 3 - Alpha',
