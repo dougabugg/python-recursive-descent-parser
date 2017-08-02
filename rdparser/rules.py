@@ -70,7 +70,7 @@ class Choice(BaseRule):
         if furthest_nodes is None:
             raise furthest
         nodes.extend(furthest_nodes)
-        return offset, nodes, furthest
+        return offset, furthest
 
 class Repeat(BaseRule):
     def __init__(self, rule, _min=None, _max=None):
@@ -88,6 +88,7 @@ class Repeat(BaseRule):
                 new_nodes = []
                 offset, last_error = self.rule.match(source, offset, new_nodes)
                 if _offset == offset:
+                    print(new_nodes, offset, last_error, self.rule.rule)
                     raise RuntimeError("infinite loop detected inside Repeat rule")
                 count += 1
             except RuleError as e:
@@ -152,16 +153,17 @@ class Regex(BaseRule):
         return offset, None
 
 class Empty(BaseRule):
-    def match(self, source, offset):
-        return offset, [], None
+    def match(self, source, offset, nodes):
+        return offset, None
 
 class Silent(BaseRule):
     def __init__(self, rule):
         self.rule = rule
     
     def match(self, source, offset, nodes):
-        offset, error = self.rule.match(source, offset, [])
-        return offset, None
+        n = []
+        offset, error = self.rule.match(source, offset, n)
+        return offset, n
 
 class EndOfStream(BaseRule):
     def __init__(self, ignore_whitespace=True):
@@ -237,7 +239,7 @@ def iter_rule(rule):
     else:
         raise TypeError("rule should be an instance of BaseRule, not " + rule.__class__)
 
-def print_rule_tree(rule, indent="| ", indent_count=0):
+def print_rule_tree(rule, indent="| ", indent_count=0, full=False):
     padding = indent * indent_count
     details = ""
     if isinstance(rule, Terminal):
@@ -245,5 +247,8 @@ def print_rule_tree(rule, indent="| ", indent_count=0):
     elif isinstance(rule, Rule):
         details = 'name=' + rule.name
     print(padding + "[{}] {}".format(rule.__class__.__name__, details))
+    if len(padding) > 40 and not full:
+        print(padding + "<full output truncated>")
+        return
     for _rule in iter_rule(rule):
-        print_rule_tree(_rule, indent, indent_count + 1)
+        print_rule_tree(_rule, indent, indent_count + 1, full)
