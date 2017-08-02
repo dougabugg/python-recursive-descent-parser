@@ -64,10 +64,11 @@ class RuleBuilder:
         old_flag_value = use_explicit_new_lines()
         use_explicit_new_lines(explicit_new_lines)
         try:
-            offset, nodes, error = rule.match(source, offset)
+            nodes = []
+            offset, error = rule.match(source, offset, nodes)
             return offset, NodeInspector(nodes[0]).mask
         except RuleError as e:
-            raise ParseError(e, source) from e
+            raise ParseError(e, source, NodeInspector(nodes[0]).mask) from e
         finally:
             use_explicit_new_lines(old_flag_value)
 
@@ -76,7 +77,7 @@ class RuleBuilder:
             return self.parse(source, offset, explicit_new_lines)
         except ParseError as e:
             e.print()
-            return e.rule_error.offset, None
+            return e.rule_error.offset, e
 
     @staticmethod
     def unwrap(target):
@@ -164,9 +165,10 @@ grammar.builder = RuleBuilder()
 
 
 class ParseError(Exception):
-    def __init__(self, rule_error, source):
+    def __init__(self, rule_error, source, node):
         self.rule_error = rule_error
         self.source = source
+        self.node = node
 
     def __str__(self):
         rule = self.rule_error

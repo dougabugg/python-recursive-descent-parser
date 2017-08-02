@@ -1,7 +1,7 @@
 Python Recursive Descent Parser
 ===============================
 
-A quick and dirty Recursive Descent Parser written using Python 3. The frontend abuses python's `data model <https://docs.python.org/3/reference/datamodel.html#special-method-names>`_ to make grammar definitions partially legible and easier to write. After a grammar is defined, it can be used to convert text into a parse tree.
+A quick and dirty Recursive Descent Parser written using Python 3. The frontend abuses python's `data model <https://docs.python.org/3/reference/datamodel.html#special-method-names>`_ to make grammar definitions partially legible and easier to write. After a grammar is defined, it can be used to convert text into a parse tree. Error handling is pretty mature, with built in support for printing the position in the source where parsing failed, and a partial parse tree is accesible when failure occurs. The entire package is still in alpha, there is lots of room for improvements (there are no tests for one thing). If you are using this project, I would love to hear any feedback!
 
 Getting Started
 ===============
@@ -140,7 +140,9 @@ Finally, the builder object has a few useful properties and methods
 * ``rule.parse(source, ...)`` parses the source input, raising a ``ParseError`` when parsing fails.
 * ``rule.parse_or_print(source, ...)`` same as ``rule.parse`` except it catches any parsing errors and pretty prints them.
 
-All builder objects have a ``parse`` method, that takes a ``source``, an ``offset``, and an ``explicit_new_lines`` flag as arguments, which uses the rule and parses the source input, outputting a tuple with the ending offset and a special ``NodeMask`` object. The ``NodeMask`` wraps a raw ``BaseNode``. Details on the ``explicit_new_lines`` flag and the ``BaseNode`` class are detailed below in the backend section.
+All builder objects have a ``parse`` method, that takes a ``source``, an ``offset``, and an ``explicit_new_lines`` flag as arguments, which uses the rule and parses the source input, outputting a tuple with the ending offset and a special ``NodeMask`` object. The ``NodeMask`` wraps a raw ``BaseNode``. Details on the ``explicit_new_lines`` flag and the ``BaseNode`` class are detailed below in the backend section. If parsing fails, a ``ParseError`` is raised, which has 3 attributes, a ``rule_error`` with the original error raised by the backend, ``source`` is the source for which parsing failed, and ``node`` is the partial parse tree.
+
+When ``prase_or_print`` supresses an error, instead of returning the root node has its second tuple item, it will return the ``ParseError`` exception instead.
 
 A regex or string literal (with ``b * "literal"``) rule will return a token node. Token nodes have an ``offset`` and ``value`` property. A named rule will return a named node, with ``_offset``, ``_end_offset``, and ``_name`` attributes. All the child rules of a parent rule will generate named nodes as children of the parent node when returned from ``parse``. These child named nodes can be accessed by their name as attributes on the parent named node. If an attribute access is made but matches no child named node, ``None`` will be returned. For each regex or string literal rule in a named rule, a token node will be present. They can be accessed either by subscripting/indexing or iterating.
 
@@ -185,7 +187,7 @@ What happens if you use the same named rule in a rule twice, or a named rule rep
 Backend - API
 =============
 
-The rules can be imported from the ``rdparser.rules`` module. Every rule is a subclass of Rule and has a method named ``match`` that takes two arguments, a source string and an offset within the source, and returns a 3 item tuple with the new offset, a list of nodes, and an optional error. If a rule fails to match, an exception will be raised subclassed from RuleError, with 3 attributes: ``offset``, ``reason``, ``offending_rule``. The error in the tuple returned from the ``match`` method is used by the ``Join``, ``Choice``, and ``Repeat`` rules to make error reporting more accurate.
+The rules can be imported from the ``rdparser.rules`` module. Every rule is a subclass of Rule and has a method named ``match`` that takes three arguments, a source string, an offset within the source, and a list to append new nodes to, and returns a 2 item tuple with the new offset and an optional error. If a rule fails to match, an exception will be raised subclassed from RuleError, with 3 attributes: ``offset``, ``reason``, ``offending_rule``. The error in the tuple returned from the ``match`` method is used by the ``Join``, ``Choice``, and ``Repeat`` rules to make error reporting more accurate.
 
 In total, there are 10 rule classes
 
