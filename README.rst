@@ -142,7 +142,7 @@ Finally, the builder object has a few useful properties and methods
 
 All builder objects have a ``parse`` method, that takes a ``source``, an ``offset``, and an ``explicit_new_lines`` flag as arguments, which uses the rule and parses the source input, outputting a tuple with the ending offset and a special ``NodeMask`` object. The ``NodeMask`` wraps a raw ``BaseNode``. Details on the ``explicit_new_lines`` flag and the ``BaseNode`` class are detailed below in the backend section. If parsing fails, a ``ParseError`` is raised, which has 3 attributes, a ``rule_error`` with the original error raised by the backend, ``source`` is the source for which parsing failed, and ``node`` is the partial parse tree.
 
-When ``prase_or_print`` supresses an error, instead of returning the root node has its second tuple item, it will return the ``ParseError`` exception instead.
+The method ``prase_or_print`` actually returns a 3 item tuple, with the third item being ``ParseError`` or ``None``. The second item contains the partial parse tree in the event of an error.
 
 A regex or string literal (with ``b * "literal"``) rule will return a token node. Token nodes have an ``offset`` and ``value`` property. A named rule will return a named node, with ``_offset``, ``_end_offset``, and ``_name`` attributes. All the child rules of a parent rule will generate named nodes as children of the parent node when returned from ``parse``. These child named nodes can be accessed by their name as attributes on the parent named node. If an attribute access is made but matches no child named node, ``None`` will be returned. For each regex or string literal rule in a named rule, a token node will be present. They can be accessed either by subscripting/indexing or iterating.
 

@@ -14,7 +14,8 @@ c.test = "{" + c.something[:] + "}"
 # print_rule_tree(c.test.rule)
 
 def test(s):
-    offset, node = c.test.parse_or_print(s)
+    offset, node, error = c.test.parse_or_print(s)
+    assert(error is None)
     if node is not None:
         print(json.dumps(node.__as_dict__(), indent = 2, sort_keys = True))
 

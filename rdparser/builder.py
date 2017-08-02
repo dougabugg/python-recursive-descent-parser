@@ -74,10 +74,11 @@ class RuleBuilder:
 
     def parse_or_print(self, source, offset=0, explicit_new_lines=None):
         try:
-            return self.parse(source, offset, explicit_new_lines)
+            o, n = self.parse(source, offset, explicit_new_lines)
+            return o, n, None
         except ParseError as e:
             e.print()
-            return e.rule_error.offset, e
+            return e.rule_error.offset, e.node, e
 
     @staticmethod
     def unwrap(target):

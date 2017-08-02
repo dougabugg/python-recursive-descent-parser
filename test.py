@@ -53,7 +53,8 @@ struct my_struct/* test / * */<A, B> {
 """
 
 def test(s):
-    offset, node = c.module_body.parse_or_print(s)
+    offset, node, error = c.module_body.parse_or_print(s)
+    assert(error is None)
     import json
     print(json.dumps(node.__as_dict__(), indent = 2, sort_keys = True))
 test(s)
