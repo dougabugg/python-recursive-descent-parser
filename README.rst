@@ -3,6 +3,8 @@ Python Recursive Descent Parser
 
 A quick and dirty Recursive Descent Parser written using Python 3. The frontend abuses python's `data model <https://docs.python.org/3/reference/datamodel.html#special-method-names>`_ to make grammar definitions partially legible and easier to write. After a grammar is defined, it can be used to convert text into a parse tree. Error handling is pretty mature, with built in support for printing the position in the source where parsing failed, and a partial parse tree is accesible when failure occurs. The entire package is still in alpha, there is lots of room for improvements (better tests, clearer documentation). If you are using this project, I would love to hear any feedback!
 
+The frontend doesn't offer any protection from infitie recursion, meaning you might run into a ``RecursionError`` while parsing. The solution right now is to reorganize your grammar so recursion doesn't occur. You can find an example of this technique in ``./examples/ebnf.py``.
+
 Getting Started
 ===============
 

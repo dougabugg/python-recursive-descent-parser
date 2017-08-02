@@ -20,9 +20,7 @@ def test(s):
         print(json.dumps(node.__as_dict__(), indent = 2, sort_keys = True))
 
 test("{}")
-# test("{ // a:b \n }")
-test("""{ // a:b
-   }""")
+test("{ // a:b \n }")
 test("{ c; }")
 
 c.identifier = {r"[a-zA-Z0-9_]+"}
