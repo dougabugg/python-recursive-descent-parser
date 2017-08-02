@@ -1,0 +1,6 @@
+Add a way to salvage the parse tree upon failure. Maybe litter try ... finally every where,
+making sure nodes are eventually added. Not sure how to "bubble up" the nodes tho, hmmm.
+It may require a rewrite of the backend, maybe to use generators or something? Idk.
+We could pass in a list that rules should attach generated nodes too, allowing the parse
+tree to grow without the function having to return. However, we must be careful of Choice,
+since failure is to be expected.
