@@ -8,7 +8,7 @@ with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
     long_description = f.read()
 
 setup(
-    name = 'rdparse',
+    name = 'rdparser',
     version='0.0.1',
     description='A quick and dirty recursive descent parser written in Python 3',
     long_description=long_description,
