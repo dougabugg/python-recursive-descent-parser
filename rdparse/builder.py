@@ -121,7 +121,7 @@ class RuleBuilder:
 
     def __ror__(self, other):
         other = self.unwrap(other)
-        return self._wrap(Choice((self.rule, other)))
+        return self._wrap(Choice((other, self.rule)))
     
     def __getitem__(self, other):
         if isinstance(other, str):
