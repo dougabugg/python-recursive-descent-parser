@@ -162,15 +162,13 @@ class Silent(BaseRule):
         self.rule = rule
     
     def match(self, source, offset, nodes):
-        n = []
-        offset, error = self.rule.match(source, offset, n)
-        return offset, n
+        offset, error = self.rule.match(source, offset, [])
+        return offset, None
 
 class EndOfStream(BaseRule):
     def __init__(self, ignore_whitespace=True):
         self.ignore_whitespace = ignore_whitespace
     def match(self, source, offset, nodes):
-        _offset = offset
         if self.ignore_whitespace:
             offset = _skip_whitespace(source, offset)
         if offset < len(source):
