@@ -85,7 +85,7 @@ bitwise or, and slicing
     c.joined_rules = c.foo + c.bar + c.baz
 
     # subtraction operator example
-    c.quoted_string = '"' + (ANY_CHAR - '"')[:] + '"'
+    c.not_three = b({r"[0-9]"}) - '3'
 
     # bitwise or operator example
     c.pet = c.cat | c.dog | c.bird
@@ -123,7 +123,7 @@ It should be noted that sets and strings, when wrapped in a grammar builder obje
     # matches only "foobar"
     c.example = "foo" + b & "bar"
 
-The end of stream rule also ignores whitespace default, and can be disabled similarly (``b & b.EOS``).
+The end of stream rule also ignores whitespace by default, and can be disabled similarly: ``b & b.EOS``
 
 Also by default, string literals are not included in the parse tree. This behavior can be disabled by multiplying a builder object with a string literal.
 
@@ -142,9 +142,9 @@ Finally, the builder object has a few useful properties and methods
 * ``rule.parse(source, ...)`` parses the source input, raising a ``ParseError`` when parsing fails.
 * ``rule.parse_or_print(source, ...)`` same as ``rule.parse`` except it catches any parsing errors and pretty prints them.
 
-All builder objects have a ``parse`` method, that takes a ``source``, an ``offset``, and an ``explicit_new_lines`` flag as arguments, which uses the rule and parses the source input, outputting a tuple with the ending offset and a special ``NodeMask`` object. The ``NodeMask`` wraps a raw ``BaseNode``. Details on the ``explicit_new_lines`` flag and the ``BaseNode`` class are detailed below in the backend section. If parsing fails, a ``ParseError`` is raised, which has 3 attributes, a ``rule_error`` with the original error raised by the backend, ``source`` is the source for which parsing failed, and ``node`` is the partial parse tree.
+All builder objects have a ``parse`` method, that takes a ``source``, an ``offset``, and an ``explicit_new_lines`` flag as arguments, which uses the rule and parses the source input, outputting a tuple containing the ending offset and a special ``NodeMask`` object. The ``NodeMask`` wraps a raw ``BaseNode``. Details on the ``explicit_new_lines`` flag and the ``BaseNode`` class are detailed below in the backend section. If parsing fails, a ``ParseError`` is raised, which has 3 attributes, a ``rule_error`` with the original error raised by the backend, ``source`` is the source for which parsing failed, and ``node`` is the partial parse tree.
 
-The method ``prase_or_print`` actually returns a 3 item tuple, with the third item being ``ParseError`` or ``None``. The second item contains the partial parse tree in the event of an error.
+The method ``parse_or_print`` actually returns a 3 item tuple, with the third item being ``ParseError`` or ``None``. The second item contains the partial parse tree in the event of an error.
 
 A regex or string literal (with ``b * "literal"``) rule will return a token node. Token nodes have an ``offset`` and ``value`` property. A named rule will return a named node, with ``_offset``, ``_end_offset``, and ``_name`` attributes. All the child rules of a parent rule will generate named nodes as children of the parent node when returned from ``parse``. These child named nodes can be accessed by their name as attributes on the parent named node. If an attribute access is made but matches no child named node, ``None`` will be returned. For each regex or string literal rule in a named rule, a token node will be present. They can be accessed either by subscripting/indexing or iterating.
 
@@ -190,10 +190,11 @@ What happens if you use the same named rule in a rule twice, or a named rule rep
 Backend - API
 =============
 
-The rules can be imported from the ``rdparser.rules`` module. Every rule is a subclass of Rule and has a method named ``match`` that takes three arguments, a source string, an offset within the source, and a list to append new nodes to, and returns a 2 item tuple with the new offset and an optional error. If a rule fails to match, an exception will be raised subclassed from RuleError, with 3 attributes: ``offset``, ``reason``, ``offending_rule``. The error in the tuple returned from the ``match`` method is used by the ``Join``, ``Choice``, and ``Repeat`` rules to make error reporting more accurate.
+The rules can be imported from the ``rdparser.rules`` module. Every rule is a subclass of ``BaseRule`` and has a method named ``match`` that takes three arguments, a source string, an offset within the source, and a list to append new nodes to, and returns a 2 item tuple with the new offset and an optional error. If a rule fails to match, an exception will be raised subclassed from ``RuleError``, with 3 attributes: ``offset``, ``reason``, ``offending_rule``. The error in the tuple returned from the ``match`` method is used by the ``Join``, ``Choice``, and ``Repeat`` rules to make error reporting more accurate.
 
-In total, there are 10 rule classes
+In total, there are 11 rule classes
 
+* ``BaseRule`` is an abstract base class that doesn't have an implementation.
 * ``Rule`` a named rule supporting forward declaration.
 * ``Join`` matches a consecutive sequence of child rules.
 * ``Choice`` matches only one rule from a sequence.
